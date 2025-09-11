@@ -73,11 +73,11 @@ TAR_BSD_RENAME := $$(tar --version | grep -i bsd > /dev/null 2>&1 && \
 									echo "-s @^dist@${NAME}@")
 dist: build
 	@echo -e "\e[1;34m[+] Generating Distributed ${NAME}.tar.gz\e[0m"
-	envsubst < ./dist/deploy.sh.template | \
-		tee ./dist/deploy.sh >/dev/null
-	envsubst < ./dist/deploy.bat.template | \
-		tee ./dist/deploy.bat >/dev/null
-	chmod +x ./dist/deploy.sh
+	#envsubst < ./dist/deploy.sh.template | \
+	#	tee ./dist/deploy.sh >/dev/null
+	#envsubst < ./dist/deploy.bat.template | \
+	#	tee ./dist/deploy.bat >/dev/null
+	#chmod +x ./dist/deploy.sh
 	cd dist && find -L -type f,l -exec sha256sum '{}' \; | sed -e '/sha256sum/d' \
 		-e '/deploy.sh.template/d' -e '/deploy.bat.template/d' -e '/.gitignore/d' \
 		-e '/.dockerignore/d' | tee sha256sum
