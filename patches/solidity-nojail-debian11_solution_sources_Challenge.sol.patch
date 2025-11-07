@@ -1,8 +1,0 @@
-diff --git a/solidity-nojail-debian11/solution/sources/Challenge.sol b/solidity-nojail-debian11/solution/sources/Challenge.sol
-new file mode 120000
-index 0000000..0eff9b0
---- /dev/null
-+++ b/solidity-nojail-debian11/solution/sources/Challenge.sol
-@@ -0,0 +1 @@
-+../../challenge/Challenge.sol
-\ No newline at end of file
