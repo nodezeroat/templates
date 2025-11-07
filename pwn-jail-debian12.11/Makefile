@@ -47,7 +47,7 @@ export NAME=$(shell echo ${UNCLEAN_NAME} | tr "[:upper:]" "[:lower:]")
 # Minor: Small functionality changes w/ backward compatibility  (in sync)
 # Patch: Small fixes specific to this template                  (not in sync)
 export _VERSION = 1.0.1
-export _TEMPLATE = pwn-nojail-alpine3.19
+export _TEMPLATE = pwn-jail-debian12
 
 ########################
 # Challenge Dockerfile #
@@ -58,8 +58,8 @@ IT=$$([ -t 0 ] && echo "-it")
 
 # Docker Run Args
 export RARGS ?= -p ${HOST}:${PORT}:1337 -e HOST=${HOST} -e PORT=${PORT} \
-	-e TIMEOUT=${TIMEOUT} --user 1337:1337 --read-only --platform linux/amd64 \
-	--pull=${PULL_POLICY_RUN}
+	-e TIMEOUT=${TIMEOUT} --read-only --privileged --pull=${PULL_POLICY_RUN} \
+	--platform linux/amd64
 # Docker Build Args
 export BARGS ?= --platform linux/amd64 --pull=${PULL_POLICY_BUILD} 
 
@@ -370,7 +370,7 @@ version:
 	@echo -e "\e[1;34m[+] Template ${_TEMPLATE} version ${_VERSION}\e[0m"
 
 shell:
-	@${RUNTIME} exec -it ${NAME} /bin/sh -c "command -v bash 2>&1 > /dev/null && bash || sh"
+	@${RUNTIME} exec -it ${NAME} /bin/sh -c "chroot /jail bash || chroot /jail sh"
 
 # DO NOT TOUCH
 # Temporary hotfix (hopefully) for DESCBR. Sorry for this!

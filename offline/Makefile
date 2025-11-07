@@ -40,14 +40,11 @@ MKPATH:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 UNCLEAN_NAME=$(notdir ${MKPATH})
 export NAME=$(shell echo ${UNCLEAN_NAME} | tr "[:upper:]" "[:lower:]")
 
-# Config for CTF-Citadel
-export INDEX    = $(shell find ../. -maxdepth 1 -type d | sort -h | awk '/\<${UNCLEAN_NAME}\>/{print NR - 1}')
-
 # DO NOT TOUCH
 # Major: Big features & breakage of interfaces                  (in sync)
 # Minor: Small functionality changes w/ backward compatibility  (in sync)
 # Patch: Small fixes specific to this template                  (not in sync)
-export _VERSION = 1.0.0
+export _VERSION = 1.0.1
 export _TEMPLATE = offline
 
 ########################
@@ -76,11 +73,11 @@ TAR_BSD_RENAME := $$(tar --version | grep -i bsd > /dev/null 2>&1 && \
 									echo "-s @^dist@${NAME}@")
 dist: build
 	@echo -e "\e[1;34m[+] Generating Distributed ${NAME}.tar.gz\e[0m"
-	envsubst < ./dist/deploy.sh.template | \
-		tee ./dist/deploy.sh >/dev/null
-	envsubst < ./dist/deploy.bat.template | \
-		tee ./dist/deploy.bat >/dev/null
-	chmod +x ./dist/deploy.sh
+	#envsubst < ./dist/deploy.sh.template | \
+	#	tee ./dist/deploy.sh >/dev/null
+	#envsubst < ./dist/deploy.bat.template | \
+	#	tee ./dist/deploy.bat >/dev/null
+	#chmod +x ./dist/deploy.sh
 	cd dist && find -L -type f,l -exec sha256sum '{}' \; | sed -e '/sha256sum/d' \
 		-e '/deploy.sh.template/d' -e '/deploy.bat.template/d' -e '/.gitignore/d' \
 		-e '/.dockerignore/d' | tee sha256sum
@@ -126,7 +123,7 @@ define run_check
 	RETVAL=$$? ; \
 	exec 3>&- ; \
 	echo -e	"\e[1;36m<<<<<<<<<<<<<< END $$(date +'%H:%M:%S')\e[0m"; \
-	printf "$$O" | grep ${FLAG} > /dev/null 2>&1 && \
+	printf "$$O" | grep -F -q -- "${FLAG}" > /dev/null 2>&1 && \
 		echo -e "\033[1;32m[+] Real flag found: ${FLAG}\033[0;0m" || ( \
 		([[ "$$RETVAL" -eq "0" ]] && \
 		echo -e "\033[1;31m[!] Flag not found\033[0;0m"; exit 1))

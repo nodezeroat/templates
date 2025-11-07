@@ -24,38 +24,56 @@ create-patch:
 	@echo -e "\e[1;34m[+] Creating and splitting patch from branch 'cla' against 'main' (excluding patches/)...\e[0m"
 	@git fetch origin main >/dev/null 2>&1
 	@git diff origin/main...origin/cla -- . ':(exclude)patches/' | awk '\
+		function flush(){ if (out) close(out); out=""; } \
 		/^diff --git a\// { \
-			if (out) close(out); \
-			fname = $$3; \
-			sub(/^a\//, "", fname); \
-			gsub(/\//, "_", fname); \
+			flush(); \
+			fname = $$3; sub(/^a\//, "", fname); \
+			dir = fname; sub(/\/[^/]*$$/, "", dir); \
+			if (dir != "") system("mkdir -p patches/" dir); \
 			out = "patches/" fname ".patch"; \
 		} \
 		{ if (out) print > out } \
+		END { flush() } \
 	'
-	@echo -e "\e[1;32m[+] Patch files saved to ./patches/\e[0m"
+	@echo -e "\e[1;32m[+] Patch files saved under ./patches/ (mirroring source dirs)\e[0m"
 
-PATCH:=./name.patch
+PATCH := ./name.patch
+
 patch:
-	@if [ -f ${PATCH} ]; then \
-		for f in $(wildcard */) ; do \
-				if [[ -d "$$f" && -f "$$f/Makefile" ]]; then \
-					 echo -e "\e[1;35m[+] Patching $$f with ${PATCH}\e[0m"; \
-					patch -d $$f --backup-if-mismatch -p2 < ${PATCH}; \
-				fi \
-		done \
+	@patchfile="${PATCH}"; \
+	if [ -f "$$patchfile" ]; then \
+		# --- Derive target dir from patch path/name ---
+		# If nested under patches/<dir>/..., use that <dir>.
+		# Else, fall back to prefix before first "_" in filename.
+		if [[ "$$patchfile" == patches/*/* ]]; then \
+			tmp=$${patchfile#patches/}; \
+			dir=$${tmp%%/*}; \
+		else \
+			base=$${patchfile##*/}; \
+			base=$${base%.patch}; \
+			dir=$${base%%_*}; \
+		fi; \
+		# --- Apply to the single matching dir ---
+		if [[ -d "$$dir" && -f "$$dir/Makefile" ]]; then \
+			echo -e "\e[1;35m[+] Patching $$dir with $$patchfile\e[0m"; \
+			patch -d "$$dir" --backup-if-mismatch -p2 < "$$patchfile"; \
+		else \
+			echo -e "\e[1;31m[!] No matching directory '$$dir' (or missing $$dir/Makefile)\e[0m"; \
+			exit 1; \
+		fi; \
 	else \
-		echo -e "\e[1;31m[+] ${PATCH} file does not exist"; \
+		echo -e "\e[1;31m[!] ${PATCH} file does not exist\e[0m"; \
+		exit 1; \
 	fi
 
 patch-all:
-	@for patchfile in patches/*.patch; do \
-		for f in $(wildcard */); do \
-			if [[ -d "$$f" && -f "$$f/Makefile" ]]; then \
-				echo -e "\e[1;35m[+] Patching $$f with $$patchfile\e[0m"; \
-				patch -d $$f --backup-if-mismatch -p2 < "$$patchfile"; \
-			fi \
-		done \
+	@for dir in */; do \
+		[[ -d "$$dir" && -f "$$dir/Makefile" && -d "patches/$$dir" ]] || continue; \
+		for p in patches/"$$dir"*.patch; do \
+			[[ -e "$$p" ]] || continue; \
+			echo -e "\e[1;35m[+] Patching $$dir with $$p\e[0m"; \
+			patch -d "$$dir" --backup-if-mismatch -p2 < "$$p"; \
+		done; \
 	done
 
 test:

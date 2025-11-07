@@ -47,14 +47,11 @@ MKPATH:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 UNCLEAN_NAME=$(notdir ${MKPATH})
 export NAME=$(shell echo ${UNCLEAN_NAME} | tr "[:upper:]" "[:lower:]")
 
-# Config for CTF-Citadel
-export INDEX    = $(shell find ../. -maxdepth 1 -type d | sort -h | awk '/\<${UNCLEAN_NAME}\>/{print NR - 1}')
-
 # DO NOT TOUCH
 # Major: Big features & breakage of interfaces                  (in sync)
 # Minor: Small functionality changes w/ backward compatibility  (in sync)
 # Patch: Small fixes specific to this template                  (not in sync)
-export _VERSION = 1.0.0
+export _VERSION = 1.0.1
 export _TEMPLATE = php-instanced-ubuntu24.04
 
 ########################
@@ -167,9 +164,9 @@ define run_check
 	RETVAL=$$? ; \
 	exec 3>&- ; \
 	echo -e	"\e[1;36m<<<<<<<<<<<<<< END $$(date +'%H:%M:%S')\e[0m"; \
-	printf "$$O" | grep ${FLAG} > /dev/null 2>&1 && \
+	printf "$$O" | grep -F -q -- "${FLAG}" > /dev/null 2>&1 && \
 		echo -e "\033[1;32m[+] Real flag found: ${FLAG}\033[0;0m" || ( \
-	printf "$$O" | grep ${FAKE_FLAG} > /dev/null 2>&1 && \
+	printf "$$O" | grep -F -q -- "${FAKE_FLAG}" > /dev/null 2>&1 && \
 		echo -e "\033[1;32m[+] Fake flag found: ${FAKE_FLAG}\033[0;0m" \
 		|| ([[ "$$RETVAL" -eq "0" ]] && \
 		echo -e "\033[1;31m[!] Flag not found\033[0;0m"; exit 1))
