@@ -1,0 +1,8 @@
+diff --git a/pwn-jail-debian12.11/challenge/.dockerignore b/pwn-jail-debian12.11/challenge/.dockerignore
+new file mode 120000
+index 0000000..3e4e48b
+--- /dev/null
++++ b/pwn-jail-debian12.11/challenge/.dockerignore
+@@ -0,0 +1 @@
++.gitignore
+\ No newline at end of file

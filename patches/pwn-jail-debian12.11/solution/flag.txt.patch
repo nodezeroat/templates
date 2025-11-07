@@ -1,0 +1,8 @@
+diff --git a/pwn-jail-debian12.11/solution/flag.txt b/pwn-jail-debian12.11/solution/flag.txt
+new file mode 120000
+index 0000000..339d84a
+--- /dev/null
++++ b/pwn-jail-debian12.11/solution/flag.txt
+@@ -0,0 +1 @@
++../challenge/flag.txt
+\ No newline at end of file

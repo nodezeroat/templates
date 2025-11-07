@@ -1,0 +1,8 @@
+diff --git a/pwn-jail-debian12.11/dist/main.c b/pwn-jail-debian12.11/dist/main.c
+new file mode 120000
+index 0000000..4293a5d
+--- /dev/null
++++ b/pwn-jail-debian12.11/dist/main.c
+@@ -0,0 +1 @@
++../challenge/main.c
+\ No newline at end of file

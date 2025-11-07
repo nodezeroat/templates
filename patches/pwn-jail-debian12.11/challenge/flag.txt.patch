@@ -1,0 +1,7 @@
+diff --git a/pwn-jail-debian12.11/challenge/flag.txt b/pwn-jail-debian12.11/challenge/flag.txt
+new file mode 100644
+index 0000000..33c3640
+--- /dev/null
++++ b/pwn-jail-debian12.11/challenge/flag.txt
+@@ -0,0 +1 @@
++gctf{REAL_REAL_REAL_REAL_REAL_REAL}

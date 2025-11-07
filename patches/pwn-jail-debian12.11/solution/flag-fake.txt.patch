@@ -1,0 +1,8 @@
+diff --git a/pwn-jail-debian12.11/solution/flag-fake.txt b/pwn-jail-debian12.11/solution/flag-fake.txt
+new file mode 120000
+index 0000000..51fe250
+--- /dev/null
++++ b/pwn-jail-debian12.11/solution/flag-fake.txt
+@@ -0,0 +1 @@
++../dist/flag.txt
+\ No newline at end of file

@@ -1,0 +1,7 @@
+diff --git a/pwn-jail-debian12.11/dist/flag.txt b/pwn-jail-debian12.11/dist/flag.txt
+new file mode 100644
+index 0000000..33c7b8d
+--- /dev/null
++++ b/pwn-jail-debian12.11/dist/flag.txt
+@@ -0,0 +1 @@
++gctf{FAKE_FAKE_FAKE_FAKE_FAKE_FAKE}

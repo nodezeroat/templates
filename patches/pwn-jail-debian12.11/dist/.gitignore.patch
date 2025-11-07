@@ -1,0 +1,10 @@
+diff --git a/pwn-jail-debian12.11/dist/.gitignore b/pwn-jail-debian12.11/dist/.gitignore
+new file mode 100644
+index 0000000..0cc5097
+--- /dev/null
++++ b/pwn-jail-debian12.11/dist/.gitignore
+@@ -0,0 +1,4 @@
++*.tar.gz
++sha256sum
++deploy.sh
++deploy.bat

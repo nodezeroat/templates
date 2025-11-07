@@ -1,0 +1,8 @@
+diff --git a/pwn-jail-debian12.11/challenge/entrypoint.sh b/pwn-jail-debian12.11/challenge/entrypoint.sh
+new file mode 100755
+index 0000000..13d43b9
+--- /dev/null
++++ b/pwn-jail-debian12.11/challenge/entrypoint.sh
+@@ -0,0 +1,2 @@
++#!/bin/sh
++/app/challenge

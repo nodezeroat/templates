@@ -1,0 +1,29 @@
+diff --git a/pwn-jail-debian12.11/deployment/ctfd-entry.yml.template b/pwn-jail-debian12.11/deployment/ctfd-entry.yml.template
+new file mode 100644
+index 0000000..6270a4a
+--- /dev/null
++++ b/pwn-jail-debian12.11/deployment/ctfd-entry.yml.template
+@@ -0,0 +1,23 @@
++name: "${FULLNAME}"
++author: "${AUTHOR}"
++category: "${CATEGORY}"
++attribution: "Author: ${AUTHOR}"
++description: "${DESCBR}"
++
++type: "dynamic"
++value: 500
++extra:
++  initial: 500
++  decay: 50
++  minimum: 50
++
++files:
++  - "${NAME}.tar.gz"
++flags:
++  - "${FLAG}"
++${COND_TAG}
++
++state: "visible"
++version: "0.1"
++
++ops:

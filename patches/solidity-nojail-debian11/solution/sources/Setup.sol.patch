@@ -1,0 +1,8 @@
+diff --git a/solidity-nojail-debian11/solution/sources/Setup.sol b/solidity-nojail-debian11/solution/sources/Setup.sol
+new file mode 120000
+index 0000000..4329d19
+--- /dev/null
++++ b/solidity-nojail-debian11/solution/sources/Setup.sol
+@@ -0,0 +1 @@
++../../challenge/Setup.sol
+\ No newline at end of file

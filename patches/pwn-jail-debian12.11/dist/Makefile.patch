@@ -1,0 +1,8 @@
+diff --git a/pwn-jail-debian12.11/dist/Makefile b/pwn-jail-debian12.11/dist/Makefile
+new file mode 120000
+index 0000000..5d7143e
+--- /dev/null
++++ b/pwn-jail-debian12.11/dist/Makefile
+@@ -0,0 +1 @@
++../challenge/Makefile
+\ No newline at end of file

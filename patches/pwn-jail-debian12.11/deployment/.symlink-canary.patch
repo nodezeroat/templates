@@ -1,0 +1,8 @@
+diff --git a/pwn-jail-debian12.11/deployment/.symlink-canary b/pwn-jail-debian12.11/deployment/.symlink-canary
+new file mode 120000
+index 0000000..d0b0e8e
+--- /dev/null
++++ b/pwn-jail-debian12.11/deployment/.symlink-canary
+@@ -0,0 +1 @@
++../Makefile
+\ No newline at end of file
