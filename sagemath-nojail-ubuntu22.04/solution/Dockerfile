@@ -13,8 +13,10 @@ COPY requirements.txt /app/requirements.txt
 RUN sage -pip install --no-cache-dir --upgrade -r /app/requirements.txt 
 
 USER root
-COPY exploit /app/exploit
-RUN chmod 755 /app/exploit
+COPY exploit /app/exploit.sage
+RUN sage -preparse /app/exploit.sage
+RUN chmod +x /app/exploit.sage.py
+RUN chmod 755 /app/exploit.sage.py
 USER 1000
 
 ENV DOT_SAGE=/tmp/
@@ -24,4 +26,4 @@ ENV TERM=linux
 WORKDIR /app
 
 SHELL ["/bin/sh", "-c"]
-CMD "/usr/bin/timeout ${TIMEOUT} ./exploit REMOTE HOST=${HOST} PORT=${PORT}"
+CMD "/usr/bin/timeout ${TIMEOUT} python3 exploit.sage.py REMOTE HOST=${HOST} PORT=${PORT}"
