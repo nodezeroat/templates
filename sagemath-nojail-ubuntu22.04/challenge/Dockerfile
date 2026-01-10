@@ -25,8 +25,9 @@ RUN sage -pip install --no-cache-dir --upgrade -r /app/requirements.txt
 # Copy challenge required files
 USER 0
 RUN mkdir -p /app
-COPY challenge /app/challenge
-RUN chmod +x /app/challenge
+COPY challenge /app/challenge.sage
+RUN sage -preparse /app/challenge.sage
+RUN chmod +x /app/challenge.sage.py
 COPY flag.txt /flag.txt
 COPY entrypoint.sh /app/entrypoint.sh
 
