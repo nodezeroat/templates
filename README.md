@@ -31,27 +31,19 @@ with `make version`.
 
 | Name                           | Version |
 | :----------------------------- | :-----: |
-| bash-jail-ubuntu24.04          | 1.1.1   |
-| bash-nojail-ubuntu24.04        | 1.1.1   |
-| flask-instanced-alpine3.21     | 1.0.1   |
-| flask-nojail-alpine3.21        | 1.0.1   |
-| offline                        | 1.0.1   |
-| php-instanced-ubuntu24.04      | 1.1.1   |
-| php-nojail-ubuntu24.04         | 1.1.1   |
-| phpxss-nojail-ubuntu24.04      | 1.1.1   |
-| pwn-jail-alpine3.21            | 1.0.1   |
-| pwn-jail-debian12              | 1.1.2   |
-| pwn-jail-ubuntu24.04           | 1.1.1   |
-| pwn-nojail-alpine3.21          | 1.0.1   |
-| pwn-nojail-ubuntu24.04         | 1.1.1   |
-| pwn-qemu-kernel                | 1.0.1   |
-| python3.12-jail-alpine3.21     | 1.0.1   |
-| python3.12-jail-ubuntu24.04    | 1.1.1   |
-| python3.12-nojail-alpine3.21   | 1.0.1   |
-| python3.12-nojail-ubuntu24.04  | 1.1.1   |
-| rust-nojail-alpine3.21         | 1.0.1   |
-| rust-nojail-ubuntu24.04        | 1.1.1   |
-| sagemath-nojail-ubuntu22.04    | 1.0.1   |
+| bash-jail-ubuntu24.04          | 1.0.0   |
+| bash-nojail-ubuntu24.04        | 1.0.0   |
+| flask-nojail-alpine3.21        | 1.0.0   |
+| offline                        | 1.0.0   |
+| php-nojail-ubuntu24.04         | 1.0.0   |
+| phpxss-nojail-ubuntu24.04      | 1.0.0   |
+| pwn-jail-debian12              | 1.0.0   |
+| pwn-jail-ubuntu24.04           | 1.0.0   |
+| pwn-nojail-ubuntu24.04         | 1.0.0   |
+| python3.12-jail-ubuntu24.04    | 1.0.0   |
+| python3.12-nojail-ubuntu24.04  | 1.0.0   |
+| rust-nojail-ubuntu24.04        | 1.0.0   |
+| sagemath-nojail-ubuntu22.04    | 1.0.0   |
 | solidity-nojail-debian11       | 0.0.1   |
 
 You can check for the latest versions within a script [here](https://raw.githubusercontent.com/LosFuzzys/LosTemplates/refs/heads/main/.versions)
@@ -123,10 +115,6 @@ Files in `solution/` holds the solvescript and writeup for the challenge.
 Dependencies for `solution/exploit` can be added via `uv` in
 `solution/requirements.txt` or `apt install` in `solution/Dockerfile`.
 
-Files in `deployment/` contains helper files for the deployment of the
-challenge. Organizers can place files here and use them from `Makefile` for
-deployments. Ex: shared testing VPS private SSH keys.
-
 **Targets**
 
 | Target             | Description                                                                                                       |
@@ -135,19 +123,11 @@ deployments. Ex: shared testing VPS private SSH keys.
 | `build`            |  Builds the challenge container.                                                                                  |
 | `run`              |  Runs the challenge container.                                                                                    |
 | `solve`            |  Solves the challenge (via netcat). Supports `HOST=remote.com` `PORT=9999`                                        |
-| `solve-sequential` |  Solves the challenge `TIMES` sequentially. Returns failed runs via `$?`                                          |
-| `solve-parallel`   |  Solves the challenge `TIMES` with `JOBS` parallel threads.                                                       |
 | `dist`             |  Generates the handout file for the challenge. Upload to CTFd and/or upstream.                                    |
 | `distrun`          |  Extracts the handout file and runs the handout challenge.                                                        |
 | `test`             |  Checks if the challenge works. Deploy+solve and deploy handout + solve.                                          |
-| `lint`             |  Lints common mistakes (resolved symlinks, missing files, same flags, etc.)º                                      |
 | `kill`             |  Kills all containers related to the challenge                                                                    |
 | `clean`            |  Cleans the challenge handout and compiled binaries                                                               |
-| `deploy`           |  Deploys the challenge via the default deployment (docker, quadlet, etc.)                                         |
-| `deploy-docker`    |  Generates the `docker-compose.yml` file for docker-compose deployment                                            |
-| `deploy-quadlet`   |  Generates the systemd quadlet unit for systemd services deployments                                              |
-| `deploy-registry`  |  Pushes the challenge container to a OCI registry specified in `REGISTRY`                                         |
-| `deploy-yml`       |  Generates the CTFd yaml file for challenge metadata                                                              |
 | `shell`            |  Opens a shell in the running challenge container (and chroots into the jail root directory in jailed challenges) |
 | `version`          |  Prints the current template version                                                                              |
 
