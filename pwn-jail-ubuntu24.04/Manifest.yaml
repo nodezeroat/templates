@@ -1,0 +1,52 @@
+# The name must match the following regex:
+#   ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+name: "challenge-name"
+
+display_name: "Challenge name"
+category: category
+
+# optional; if you don't want tags, delete it
+tags: ["Tag1", "Tag2"]
+
+author:
+    name: "your name"
+    # optional; if you don't want this, delete it
+    email: "your_email@example.com"
+
+# The description can be written as block-content, all line breaks are
+# being retained
+# https://yaml.org/spec/1.2.2/#23-scalars
+description: |
+    Your multiline description
+
+points:
+    initial: 550
+    decay: 50
+    minimum: 100
+    function: linear
+
+connectinfo: >-
+    <code>snicat {{ infos['chained-challenge_container']['1337']['hostname'] }}</code><br>
+    We recommend using <a href="https://github.com/CTFd/snicat" target="_blank">snicat</a> to connect to the challenge.
+
+deployment:
+    - name: "challenge_container"
+      buildcontext: "challenge"
+      sandboxed: true
+      ports:
+        - 1337/tcp
+      flag:
+        # If you use RAND, then this part is altered if "env_dynamic" is being
+        # used as type
+        value: "YOUR_FLAG"
+        # The type can be one of the following:
+        # "static": The flag is present in e.g. a textfile and is not altered.
+        #   this needs to be handled by the challenge creator
+        # "env_static": The flag is passed as environment-variable ("FLAG")
+        #   It is not altered
+        # "env_dynamic": Same as "env_static", but if RAND is specified in the
+        #   flaag, then this part is altered
+        type: "env_dynamic"
+
+build: true
+check: true

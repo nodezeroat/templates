@@ -1,0 +1,31 @@
+
+# Must adhear to this regex: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+name: "challenge-name"
+
+display_name: "Challenge name"
+category: category
+
+# optional; if you don't want tags, delete it
+tags: ["Tag1", "Tag2"]
+
+author:
+    name: "your name"
+    # optional; if you don't want this, delete it
+    email: "your_email@example.com"
+
+flag: "YOUR_FLAG"
+
+# The description can be written as block-content, all line breaks are
+# being retained
+# https://yaml.org/spec/1.2.2/#23-scalars
+description: |
+    Your multiline description
+
+points:
+    initial: 550
+    decay: 50
+    minimum: 100
+    function: linear
+
+build: true
+check: true
