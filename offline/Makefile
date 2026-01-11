@@ -1,4 +1,4 @@
-.PHONY: all run build solve solve-sequential solve-parallel kill dist distrun clean deploy version lint test
+.PHONY: all run build solve kill dist distrun clean version lint test
 
 # Targets
 all: build run
