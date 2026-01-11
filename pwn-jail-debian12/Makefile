@@ -5,8 +5,6 @@ all: build run
 run: crun
 build: cbuild
 solve: sbuild srun
-solve-sequential: sbuild srun-sequential
-solve-parallel: sbuild srun-parallel
 kill: ckill skill
 
 ############################
@@ -30,7 +28,7 @@ export NAME=$(shell echo ${UNCLEAN_NAME} | tr "[:upper:]" "[:lower:]")
 # Major: Big features & breakage of interfaces                  (in sync)
 # Minor: Small functionality changes w/ backward compatibility  (in sync)
 # Patch: Small fixes specific to this template                  (not in sync)
-export _VERSION = 1.1.2
+export _VERSION = 1.0.0
 export _TEMPLATE = pwn-jail-debian12
 
 ########################
@@ -149,18 +147,6 @@ srun:
 		"${HOST}:${PORT}\e[0m"
 	@$(call run_check,,-it)
 
-TIMES=10
-srun-sequential:
-	@echo -e "\e[1;34m[+] Running Sequential Container against" \
-		"${HOST}:${PORT}\e[0m"
-	@parallel --line-buffer --jobs 1 '$(call run_check,-sequential-{},)' \
-		::: `seq -s' ' 1 1 ${TIMES}`
-	
-JOBS=4
-srun-parallel:
-	@echo -e "\e[1;34m[+] Running Parallel Container against ${HOST}:${PORT}\e[0m"
-	@parallel --jobs ${JOBS} '$(call run_check,-parallel-{},)' \
-		::: `seq -s' ' 1 1 ${TIMES}`
 
 skill:
 	@echo -e "\e[1;34m[+] Killing Solution Container/s\e[0m"
@@ -168,71 +154,6 @@ skill:
 		| tr '\n' ' ' \
 		| xargs -r ${RUNTIME} stop -t 0 \
 		|| true
-
-########################
-# Challenge Deployment #
-########################
-deploy: deploy-registry
-
-DESCBR=$(subst $(newline),<br />,${DESC})
-export DESCBR
-deploy-yml:
-	@echo -e "\e[1;34m[+] Generating CTFd challenge yml\e[0m"
-	IFS=',' read -ra arr -d '' <<< "$${TAGS}"; \
-	COND_TAG=$$( \
-		if [ -n "$${TAGS}" ]; then \
-		echo -e "tags:"; \
-		for t in "$${arr[@]}"; do echo -e "  - \"$$(echo $$t | xargs)\""; done \
-		fi \
-	) \
-	envsubst < ${MKPATH}/deployment/ctfd-entry.yml.template | \
-		tee ${MKPATH}/deployment/ctfd-${NAME}.yml >/dev/null
-
-# Deployments for podman quadlets (systemd services)
-deploy-quadlet:
-	@echo -e "\e[1;34m[+] Generating podman-quadlet deployment\e[0m"
-	@mkdir -p ~/.config/containers/systemd/
-	echo -e "[Unit]\nDescription=Challenge ${NAME}\n" > \
-		~/.config/containers/systemd/chall-${NAME}.container
-	${RUNTIME} run ghcr.io/containers/podlet \
-		podman run --rm --name ${NAME} ${RARGS} ${REGISTRY}/${NAME} \
-		>> ~/.config/containers/systemd/chall-${NAME}.container
-	echo -e "\n[Service]\nRestart=always\n\n[Install]\nWantedBy=default.target" \
-		>> ~/.config/containers/systemd/chall-${NAME}.container
-	sed -i 's/--tty//' ~/.config/containers/systemd/chall-${NAME}.container
-	sed -i 's/--interactive//' \
-		~/.config/containers/systemd/chall-${NAME}.container
-	@systemctl --user daemon-reload
-	@echo -e "\e[1;34m[+] Genereated podman-quadlet deployment:\e[0m"
-	@cat ~/.config/containers/systemd/chall-${NAME}.container
-	@echo -e "\e[1;34m[+] Generated systemd service:\e[0m"
-	systemctl --user status chall-${NAME} || true
-	@echo -e "\e[1;34m[+] Start the container:\e[0m"
-	@echo    "    systemctl --user start chall-${NAME}"
-	@echo -e "\e[1;34m[+] Remember to enable (once) lingering for the user\e[0m"
-	@echo    "    loginctl enable-linger $$USER"
-	@echo -e "\e[1;34m[+] Target for ${NAME} is ${HOST}:${PUBPORT}\e[0m"
-
-# Deployment for docker-compose
-deploy-docker:
-	@echo -e "\e[1;34m[+] Generating docker-compose deployment\e[0m"
-	${RUNTIME} run ghcr.io/losfuzzys/composerize:latest \
-		docker run --rm --name ${NAME} ${RARGS} ${REGISTRY}/${NAME} \
-		> ${MKPATH}/deployment/docker-compose.yml
-	sed -i '1 s/^.*$$/name: ctf/' ${MKPATH}/deployment/docker-compose.yml
-	@echo "    restart: always" >> ${MKPATH}/deployment/docker-compose.yml
-	sed -i '/tty: true/d' ${MKPATH}/deployment/docker-compose.yml
-	sed -i '/stdin_open: true/d' ${MKPATH}/deployment/docker-compose.yml
-	@echo -e "\e[1;34m[+] Generated docker-compose.yml deployment:\e[0m"
-	@cat ${MKPATH}/deployment/docker-compose.yml
-	@echo -e "\e[1;34m[+] Start the container:\e[0m"
-	@echo "    docker-compose up -d -f ${MKPATH}/deployment/docker-compose.yml"
-	@echo -e "\e[1;34m[+] Target for ${NAME} is ${HOST}:${PUBPORT}\e[0m"
-
-# Deployment for registry
-deploy-registry: 
-	@echo -e "\e[1;34m[+] Deploying Container/s\e[0m"
-	${RUNTIME} push ${REGISTRY}/${NAME}
 
 #############
 # Testsuite #
@@ -292,59 +213,6 @@ test-dist:
 	@make kill RUNTIME=${RUNTIME_DIST} > /dev/null 2>&1
 	@${RM} ${MKPATH}/test.log
 
-###########
-# Generic #
-###########
-
-SHELL := /usr/bin/env bash
-export RUNTIME ?= docker
-export RUNTIME_DIST ?= docker
-# PULL_POLICY_RUN options: always, missing, never
-export PULL_POLICY_RUN = never
-# PULL_POLICY_BUILD options in docker: true, false
-# PULL_POLICY_BUILD options in podman: true, false, always, missing, never
-export PULL_POLICY_BUILD = true 
-
-define lint_assert_file_exists
-	@([ ! -f ${MKPATH}/${1} ] && \
-		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} missing") || \
-		echo "[OK  ] ${1} exists"
-endef
-
-define lint_assert_files_differ
-	@((diff ${MKPATH}/${1} ${MKPATH}/${2} &>/dev/null) && \
-		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} and ${2} are equivalent") || \
-		echo "[OK  ] ${1} and ${2} are different"
-endef
-
-define lint_assert_file_commited
-	git show HEAD:${MKPATH}/${1} &>/dev/null; \
-	([[ "$?" != 0 ]] && \
-		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} not commited in git") || \
-		echo "[OK  ] ${1} commited in git"
-endef
-
-define lint_assert_symlink
-	@(([ ! -L ${MKPATH}/${1} ] || [ ! -e ${MKPATH}/${1} ]) && \
-		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} is not a valid symlink") || \
-		echo "[OK  ] ${1} is a valid symlink"
-endef
-
-define lint_assert_empty
-	@([ ! -s ${MKPATH}/${1} ] && \
-		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} is empty") || \
-		echo "[OK  ] ${1} has content"
-endef
-
-lint:
-	@$(call lint_assert_file_exists,challenge/flag.txt)
-	@$(call lint_assert_file_exists,dist/flag.txt)
-	@$(call lint_assert_file_exists,${NAME}.tar.gz)
-	@$(call lint_assert_files_differ,dist/flag.txt,challenge/flag.txt)
-	@$(call lint_assert_file_commited,${NAME}.tar.gz)
-	@$(call lint_assert_symlink,deployment/.symlink-canary)
-	@$(call lint_assert_empty,solution/WRITEUP.md)
-
 clean:
 	${RM} ${NAME}.tar.gz dist/challenge dist/deploy.sh dist/sha256sum \
 		solution/challenge ctfd-${NAME}.yml
@@ -355,12 +223,5 @@ version:
 
 shell:
 	@${RUNTIME} exec -it ${NAME} /bin/sh -c "chroot /jail bash || chroot /jail sh"
-
-# DO NOT TOUCH
-# Temporary hotfix (hopefully) for DESCBR. Sorry for this!
-define newline
-
-
-endef
 
 # vim:tabstop=2 softtabstop=2 shiftwidth=2 noexpandtab colorcolumn=81
