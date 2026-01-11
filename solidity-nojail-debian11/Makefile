@@ -9,21 +9,6 @@ solve-sequential: sbuild srun-sequential
 solve-parallel: sbuild srun-parallel
 kill: ckill skill
 
-######################
-# CTFd Configuration #
-######################
-
-export FULLNAME  = CTFd challenge name
-export AUTHOR    = LosFuzzys
-export CATEGORY  = smartcontract
-define DESC
-This is a multiline challenge description!
-
-Feel free to add more lines.
-endef
-export FLAG      = $(shell cat challenge/flag.txt)
-export TAGS      = tag1, tag2, tag with space 
-
 ############################
 # Deployment Configuration #
 ############################
