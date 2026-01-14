@@ -26,8 +26,8 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 # Copy challenge required files
 RUN mkdir -p /app
-COPY challenge /app/challenge
-RUN chmod +x /app/challenge
+COPY challenge.py /app/challenge.py
+RUN chmod +x /app/challenge.py
 COPY flag.txt /flag.txt
 COPY entrypoint.sh /app/entrypoint.sh
 

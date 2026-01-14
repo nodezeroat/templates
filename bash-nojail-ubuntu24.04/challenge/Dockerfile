@@ -17,8 +17,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y socat co
 
 # Copy challenge required files
 RUN mkdir -p /app
-COPY challenge /app/challenge
-RUN chmod +x /app/challenge
+COPY challenge.bash /app/challenge.bash
+RUN chmod +x /app/challenge.bash
 COPY flag.txt /flag.txt
 COPY entrypoint.sh /app/entrypoint.sh
 

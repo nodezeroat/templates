@@ -38,8 +38,8 @@ COPY --from=base / /jail
 
 # Copy challenge required files
 RUN mkdir -p /jail/app
-COPY challenge /jail/app/challenge
-RUN chmod +x /jail/app/challenge
+COPY challenge.py /jail/app/challenge.py
+RUN chmod +x /jail/app/challenge.py
 COPY flag.txt /jail/flag.txt
 COPY entrypoint.sh /jail/app/entrypoint.sh
 
