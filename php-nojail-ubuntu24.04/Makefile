@@ -25,6 +25,14 @@ MKPATH:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 UNCLEAN_NAME=$(notdir ${MKPATH})
 export NAME=$(shell echo ${UNCLEAN_NAME} | tr "[:upper:]" "[:lower:]")
 
+export RUNTIME ?= docker
+export RUNTIME_DIST ?= docker
+# PULL_POLICY_RUN options: always, missing, never
+export PULL_POLICY_RUN = never
+# PULL_POLICY_BUILD options in docker: true, false
+# PULL_POLICY_BUILD options in podman: true, false, always, missing, never
+export PULL_POLICY_BUILD = true
+
 # DO NOT TOUCH
 # Major: Big features & breakage of interfaces                  (in sync)
 # Minor: Small functionality changes w/ backward compatibility  (in sync)
