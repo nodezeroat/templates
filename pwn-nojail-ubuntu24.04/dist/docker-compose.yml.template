@@ -1,0 +1,15 @@
+services:
+  challenge:
+    image: localhost/${NAME}
+    container_name: ${NAME}
+    build: .
+    ports:
+      - ${HOST}:${PORT}:1337
+    environment:
+      - HOST=${HOST}
+      - PORT=${PORT}
+      - TIMEOUT=${TIMEOUT}
+    pull_policy: never
+    read_only: true
+    privileged: false
+    platform: linux/amd64
