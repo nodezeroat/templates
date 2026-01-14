@@ -9,6 +9,7 @@ services:
       - HOST=${HOST}
       - PORT=${PORT}
       - TIMEOUT=${TIMEOUT}
+      - FLAG=FLAG{dummy_flag}
     pull_policy: never
     read_only: true
     privileged: false
