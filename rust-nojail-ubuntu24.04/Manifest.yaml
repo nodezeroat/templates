@@ -26,7 +26,7 @@ points:
     function: linear
 
 connectinfo: >-
-    <code>snicat {{ infos['chained-challenge_container']['1337']['hostname'] }}</code><br>
+    <code>snicat {{ infos['challenge_container']['1337']['hostname'] }}</code><br>
     We recommend using <a href="https://github.com/CTFd/snicat" target="_blank">snicat</a> to connect to the challenge.
 
 deployment:
