@@ -40,29 +40,8 @@ COPY --from=base / /jail
 RUN mkdir -p /jail/app
 COPY challenge.py /jail/app/challenge.py
 RUN chmod +x /jail/app/challenge.py
-COPY flag.txt /jail/flag.txt
+COPY setup_entrypoint.sh /setup_entrypoint.sh
 COPY entrypoint.sh /jail/app/entrypoint.sh
 
-# add "-m none:/DESTPATH:tmpfs:size=N" before --cwd on nsjail args to have a tmpfs-backed writable DESTPATH of N bytes
-# remember that /DESTPATH cannot contain any files coming from /jail (as its a mount). If you want 
-# pre-created/copied files in /DESTPATH you should manually copy them in entrypoint.sh
-# Note: /DESTPATH should not contain /jail as a prefix
 SHELL ["/bin/sh", "-c"]
-CMD nsjail \
-    --mode l \
-    --disable_proc \
-    --time_limit ${TIMEOUT} \
-    --bindhost 0.0.0.0 \
-    --port 1337 \
-    --bindmount_ro /jail:/ \
-    -m none:/dev:tmpfs:mode=555,size=1,uid=65534,gid=65534 \
-    -R /dev/urandom \
-    -R /dev/random \
-    -B /dev/null \
-    -R /dev/zero \
-    --cwd /app/ \
-    -u 1337:1337:1 \
-    -g 1337:1337:1 \
-    -u 65534:65534:1 \
-    -g 65534:65534:1 \
-    -- /app/entrypoint.sh
+CMD ["/setup_entrypoint.sh"]

@@ -151,7 +151,6 @@ Arguments can be used as:
 $ make PORT=8080
 $ make solve HOST=challenges.ssdvps.com PORT=8080
 $ make deploy-docker PORT=10001
-$ make solve-parallel TIMES=100 JOBS=10
 $ make RUNTIME='sudo docker'
 ```
 
@@ -171,6 +170,12 @@ We don't recommend disabling the buffering at the `entrypoint.sh` for C
 programs, it usually `LD_PRELOAD`s the binary and causes unexpected
 allocations, likely breaking locally developed heap exploits. Always disable it
 in the program `main` or init function with `man 3 setvbuf`.
+
+**Location of the flag**
+These templates expect a flag in the environment variable `FLAG`.
+To make solving PWn-challenges a bit easier for participants, PWN-challenges
+have a file that contains the flag.
+
 
 **Creating a writeable path:**
 

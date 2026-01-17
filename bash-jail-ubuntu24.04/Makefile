@@ -47,8 +47,8 @@ CACHEBUST=$(shell date +%s)
 IT=$$([ -t 0 ] && echo "-it")
 
 # Docker Run Args
-export RARGS ?= -p ${HOST}:${PORT}:1337 -e HOST=${HOST} -e PORT=${PORT} \
-	-e TIMEOUT=${TIMEOUT} --read-only --privileged --pull=${PULL_POLICY_RUN} \
+export RARGS ?= -p ${HOST}:${PORT}:1337 -e HOST=${HOST} -e PORT=${PORT} -e FLAG="gctf{FLAG}"\
+	-e TIMEOUT=${TIMEOUT} --privileged --pull=${PULL_POLICY_RUN} \
 	--platform linux/amd64
 # Docker Build Args
 export BARGS ?= --platform linux/amd64 --pull=${PULL_POLICY_BUILD} 
