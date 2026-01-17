@@ -4,6 +4,7 @@
 
 import os
 
+FLAG = os.getenv("FLAG", "flag{DEFAULT_FLAG_PLEASE_SET_ONE}")
 
 def main():
     L = [3, [5, 1, 4, 2, 3], 17, 17, 3, 51]
@@ -18,8 +19,7 @@ def main():
     # Check if sagemath-operators work as expected
     assert 3 ^ 2 == 9, "Sagemath-operators don't seem to work correctly!!"
 
-    with open('/flag.txt', 'r') as flag:
-        print(f"Here is your flag: {flag.read()}")
+    print(f"Here is your flag: {FLAG}")
 
     exit(0)
 

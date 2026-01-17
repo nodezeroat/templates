@@ -4,14 +4,15 @@
 
 import os
 
+FLAG = os.getenv("FLAG", "flag{DEFAULT_FLAG_PLEASE_SET_ONE}")
+
 def main():
     print(f"Hello World")
 
     number = input("Give me input: ")
     print(f"Your input was {number}")
 
-    with open('/flag.txt', 'r') as flag:
-        print(f"Here is your flag: {flag.read()}")
+    print(f"Here is your flag: {FLAG}")
 
     exit(0)
 

@@ -47,7 +47,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y socat co
 RUN mkdir -p /app
 COPY --from=builder /tmp/build/challenge /app/challenge
 RUN chmod +x /app/challenge
-COPY flag.txt /flag.txt
 COPY entrypoint.sh /app/entrypoint.sh
 
 SHELL ["/bin/sh", "-c"]

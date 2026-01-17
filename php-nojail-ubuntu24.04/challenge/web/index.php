@@ -1,7 +1,7 @@
 <html>
   <body>
     <?php
-      if(isset($_GET["flag"])) echo file_get_contents("/flag.txt");
+      if(isset($_GET["flag"])) echo getenv('FLAG');
     ?>
   </body>
 </html>

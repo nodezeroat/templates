@@ -10,6 +10,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from pyvirtualdisplay import Display
 
+FLAG = os.getenv("FLAG", "flag{DEFAULT_FLAG_PLEASE_SET_ONE}")
+
 class Bot:
     driver = None
 
@@ -61,16 +63,12 @@ class Bot:
 
 if __name__ == '__main__':  
     print("\033[93mStarting bot\033[0m", flush=True)
-    f = open("/flag.txt")
-    flag = f.read()
-    f.close()
-
     bot = Bot()
     # Binding Cookie to site
     bot.driver.get("http://localhost/")
     bot.driver.add_cookie({
         "name": "flag",
-        "value": flag.strip(),
+        "value": FLAG.strip(),
     })
 
     running = True
