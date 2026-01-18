@@ -47,7 +47,7 @@ CACHEBUST=$(shell date +%s)
 IT=$$([ -t 0 ] && echo "-it")
 
 # Docker Run Args
-export RARGS ?= -p ${HOST}:${PORT}:1337 -e HOST=${HOST} -e PORT=${PORT} \
+export RARGS ?= -p ${HOST}:${PORT}:1337 -e HOST=${HOST} -e PORT=${PORT} -e FLAG="flag{dummy}\
 	-e TIMEOUT=${TIMEOUT} --user 1000:1000 --read-only --tmpfs /tmp \
 	--platform linux/amd64 --pull=${PULL_POLICY_RUN}
 # Docker Build Args
