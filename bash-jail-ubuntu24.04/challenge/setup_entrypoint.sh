@@ -2,6 +2,7 @@
 
 echo $FLAG > /jail/flag.txt
 cat /jail/flag.txt
+unset FLAG
 
 # add "-m none:/DESTPATH:tmpfs:size=N" before --cwd on nsjail args to have a tmpfs-backed writable DESTPATH of N bytes
 # remember that /DESTPATH cannot contain any files coming from /jail (as its a mount). If you want 
