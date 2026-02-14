@@ -52,7 +52,7 @@ export _TEMPLATE = solidity-nojail-debian11
 ########################
 
 CACHEBUST=$(shell date +%s)
-IT=$$([ -t 0 ] && echo "-it")
+
 
 # Docker Run Args
 export RARGS ?= \
@@ -72,8 +72,8 @@ export BARGS ?= --platform linux/amd64 --pull=${PULL_POLICY_BUILD}
 
 crun:
 	@echo -e "\e[1;34m[+] Running Challenge Container on ${HOST}:${PORT}\e[0m"
-	${RUNTIME} run --rm --name ${NAME} ${RARGS} ${IT} ${REGISTRY}/${NAME}
-	echo ${RUNTIME} run --rm --name ${NAME} ${RARGS} ${IT} ${REGISTRY}/${NAME}
+	${RUNTIME} run --rm --name ${NAME} ${RARGS} ${REGISTRY}/${NAME}
+	echo ${RUNTIME} run --rm --name ${NAME} ${RARGS} ${REGISTRY}/${NAME}
 
 cbuild:
 	@echo -e "\e[1;34m[+] Building Challenge Container\e[0m"
