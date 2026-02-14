@@ -48,7 +48,7 @@ CACHEBUST=$(shell date +%s)
 IT=$$([ -t 0 ] && echo "-it")
 
 # Docker Run Args
-export RARGS ?= -p ${HOST}:${PORT}:80 -e HOST=${HOST} -e PORT=${PORT} -e FLAG="flag{dummy}\
+export RARGS ?= -p ${HOST}:${PORT}:80 -e HOST=${HOST} -e PORT=${PORT} -e FLAG="flag{dummy}" \
 	--user 0:0 --platform linux/amd64 --pull=${PULL_POLICY_RUN}
 # Docker Build Args
 export BARGS ?= --platform linux/amd64 --pull=${PULL_POLICY_BUILD} 
