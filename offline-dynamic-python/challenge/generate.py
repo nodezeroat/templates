@@ -1,9 +1,10 @@
-
+import os
 
 def main() -> int:
+    flag = os.getenv("FLAG", "flag{dummy_flag}")
 
     with open("flag.txt", "w") as flag_file:
-        flag_file.write("FLAAAAAG")
+        flag_file.write(flag)
 
     return 0
 

@@ -34,10 +34,9 @@ export _TEMPLATE = offline-dynamic-python
 ########################
 
 CACHEBUST=$(shell date +%s)
-IT=$$([ -t 0 ] && echo "-it")
 
 # Docker Run Args
-export RARGS ?= -p ${HOST}:${PORT}:80 -e HOST=${HOST} -e PORT=${PORT} -e FLAG="flag{dummy}\
+export RARGS ?= -p ${HOST}:${PORT}:80 -e HOST=${HOST} -e PORT=${PORT} -e FLAG="flag{dummy}" \
 	-e TIMEOUT=${TIMEOUT} --platform linux/amd64 \
 	--pull=${PULL_POLICY_RUN}
 # Docker Build Args
@@ -45,7 +44,7 @@ export BARGS ?= --platform linux/amd64 --pull=${PULL_POLICY_BUILD}
 
 crun:
 	@echo -e "\e[1;36m[+] Running Challenge Container on ${HOST}:${PORT}\e[0m"
-	${RUNTIME} run --rm --name ${NAME} ${RARGS} ${IT} ${REGISTRY}/${NAME} 
+	${RUNTIME} run --rm --name ${NAME} ${RARGS} ${REGISTRY}/${NAME} 
 
 cbuild:
 	@echo -e "\e[1;34m[+] Building Challenge Container\e[0m"
