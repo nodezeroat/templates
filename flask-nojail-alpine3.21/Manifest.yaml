@@ -33,7 +33,7 @@ deployment:
       buildcontext: "challenge"
       sandboxed: false
       ports:
-        - 1337/tcp
+        - 1337/http
       flag:
         # If you use RAND, then this part is altered if "env_dynamic" is being
         # used as type
