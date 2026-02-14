@@ -27,7 +27,6 @@ points:
 
 connectinfo: >-
     <a href="{{ infos['challenge_container']['1337']['hostname'] }}" target=_blank>{{ infos['challenge_container']['1337']['hostname'] }}</a>
-    We recommend using <a href="https://github.com/CTFd/snicat" target="_blank">snicat</a> to connect to the challenge.
 
 deployment:
     - name: "challenge_container"
