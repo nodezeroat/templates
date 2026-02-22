@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Preparing Distributable</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .spinner {
+      margin: 20px auto;
+      width: 36px;
+      height: 36px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .spinner.hidden {
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="status">Preparing your distributable, please wait</h2>
+    <div class="spinner" id="spinner"></div>
+  </div>
+
+  <script>
+    const fileUrl = "challenge.tar.gz";
+    const fileName = "challenge.tar.gz";
+    const CHECK_INTERVAL_MS = 10_000; // 10 seconds
+
+    let intervalId = null;
+    let downloadStarted = false;
+
+    async function fileExists() {
+      try {
+        const response = await fetch(fileUrl, {
+          method: "HEAD",
+          cache: "no-store"
+        });
+        return response.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    function stopSpinner() {
+      document.getElementById("spinner").classList.add("hidden");
+    }
+
+    function setStatus(html) {
+      document.getElementById("status").innerHTML = html;
+    }
+
+    function downloadFile() {
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setStatus('Distributable downloaded!<br><small>klick <a href="/challenge.tar.gz">here</a> if it didn\'t work</small>');
+    }
+
+    async function pollForFile() {
+      if (downloadStarted) return;
+
+      const exists = await fileExists();
+      if (!exists) return;
+
+      downloadStarted = true;
+
+      clearInterval(intervalId);
+      stopSpinner();
+      downloadFile();
+    }
+
+    pollForFile();
+
+    intervalId = setInterval(pollForFile, CHECK_INTERVAL_MS);
+  </script>
+</body>
+</html>

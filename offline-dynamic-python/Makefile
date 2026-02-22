@@ -1,0 +1,253 @@
+.PHONY: all run build solve kill dist distrun clean version lint test
+
+# Targets
+all: build run
+run: crun
+build: cbuild
+solve: sbuild srun
+kill: ckill skill
+
+############################
+# Deployment Configuration #
+############################
+
+export REGISTRY = localhost
+export HOST     = 127.0.0.1
+# Port for private deployments
+export PORT     = 1337
+export TIMEOUT  = 30
+
+# Slugified challenge name. Default to directory name
+MKPATH:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+UNCLEAN_NAME=$(notdir ${MKPATH})
+export NAME=$(shell echo ${UNCLEAN_NAME} | tr "[:upper:]" "[:lower:]")
+
+# DO NOT TOUCH
+# Major: Big features & breakage of interfaces                  (in sync)
+# Minor: Small functionality changes w/ backward compatibility  (in sync)
+# Patch: Small fixes specific to this template                  (not in sync)
+export _VERSION = 1.0.0
+export _TEMPLATE = offline-dynamic-python
+
+########################
+# Challenge Dockerfile #
+########################
+
+CACHEBUST=$(shell date +%s)
+
+# Docker Run Args
+export RARGS ?= -p ${HOST}:${PORT}:80 -e HOST=${HOST} -e PORT=${PORT} -e FLAG="flag{dummy}" \
+	-e TIMEOUT=${TIMEOUT} --platform linux/amd64 \
+	--pull=${PULL_POLICY_RUN}
+# Docker Build Args
+export BARGS ?= --platform linux/amd64 --pull=${PULL_POLICY_BUILD} 
+
+crun:
+	@echo -e "\e[1;36m[+] Running Challenge Container on ${HOST}:${PORT}\e[0m"
+	${RUNTIME} run --rm --name ${NAME} ${RARGS} ${REGISTRY}/${NAME} 
+
+cbuild:
+	@echo -e "\e[1;34m[+] Building Challenge Container\e[0m"
+	#${RUNTIME} build -t ${REGISTRY}/${NAME}-build --target builder ${BARGS} \
+	#	${MKPATH}/challenge/
+	#${RUNTIME} run  -v ${MKPATH}/dist:/dist:z ${REGISTRY}/${NAME}-build
+	#cp ${MKPATH}/challenge/challenge ${MKPATH}/solution/
+	${RUNTIME} build -t ${REGISTRY}/${NAME} ${BARGS} \
+		--build-arg CACHEBUST=${CACHEBUST} ${MKPATH}/challenge/
+
+ckill:
+	@echo -e "\e[1;34m[+] Killing Challenge Container\e[0m"
+	${RUNTIME} ps --filter "name=${NAME}" --format "{{.ID}}" \
+		| tr '\n' ' ' \
+		| xargs -r ${RUNTIME} stop -t 0 \
+		|| true
+
+##########################
+# Challenge Distribution #
+##########################
+
+HSH := $(shell md5sum dist/sha256sum 2>/dev/null | cut -d' ' -f1)
+
+# If tar complains about --transform, ensure you have GNU tar
+TAR_GNU_RENAME := $$(tar --version | grep -i gnu > /dev/null 2>&1 && \
+									echo "--transform s@^dist@${NAME}@")
+TAR_BSD_RENAME := $$(tar --version | grep -i bsd > /dev/null 2>&1 && \
+									echo "-s @^dist@${NAME}@")
+dist: build
+	@echo -e "\e[1;34m[+] Generating Distributed ${NAME}.tar.gz\e[0m"
+	#envsubst < ./dist/deploy.sh.template | \
+	#	tee ./dist/deploy.sh >/dev/null
+	#envsubst < ./dist/deploy.bat.template | \
+	#	tee ./dist/deploy.bat >/dev/null
+	#chmod +x ./dist/deploy.sh
+	cd dist && find -L -type f,l -exec sha256sum '{}' \; | sed -e '/sha256sum/d' \
+		-e '/deploy.sh.template/d' -e '/deploy.bat.template/d' -e '/.gitignore/d' \
+		-e '/.dockerignore/d' | tee sha256sum
+	tar -h --exclude 'deploy.sh.template' --exclude '.gitignore' \
+		--exclude 'deploy.bat.template' --exclude '.dockerignore' \
+		${TAR_GNU_RENAME} -czvf ${NAME}.tar.gz ${TAR_BSD_RENAME} dist/
+	@echo -e "\e[1;34m[+] Generated Distributed ${NAME}.tar.gz\e[0m"
+	@echo -n "    md5sum(dist/sha256sum): (old) ${HSH} -> (new) "
+	@md5sum dist/sha256sum | cut -d' ' -f1
+	@echo    "    - old == new: same challenge sources => no need to worry"
+	@echo    "    - old != new: new  challenge sources => re-check distrun & solve"
+
+# Deploy the generate dist file for testing
+distrun:
+	@echo -e "\e[1;34m[+] (distrun) Not implemented in this template\e[0m"
+
+#########################
+# Challenge Solvescript #
+#########################
+
+# Docker Run Args
+SRARGS=-e HOST=${HOST} -e PORT=${PORT} -e TIMEOUT=${TIMEOUT} \
+			 --hostname localhost --net=host \
+			 -v ${MKPATH}/challenge/flag.txt:/app/flag.txt:z,ro \
+			 -v ${MKPATH}/challenge/flag.txt:/flag.txt:z,ro \
+			 -v ${MKPATH}/dist/flag.txt:/app/flag-fake.txt:z,ro \
+			 -v ${MKPATH}/dist/flag.txt:/flag-fake.txt:z,ro \
+			 --platform linux/amd64 --pull=${PULL_POLICY_RUN} 
+# Docker Build Args
+SBARGS=--platform linux/amd64 --pull=${PULL_POLICY_BUILD} 
+
+sbuild:
+	@echo -e "\e[1;34m[+] Building Solvescript Container\e[0m"
+	cd solution/ ; \
+	${RUNTIME} build -t ${REGISTRY}/${NAME}-solvescript ${SBARGS} .
+
+define run_check
+	cd solution/ ; \
+	echo -e	"\e[1;36m>>>>>>>>>>>>>> START $$(date +'%H:%M:%S')\e[0m"; \
+	exec 3>&1 ; \
+	O=$$(${RUNTIME} run --rm ${SRARGS} ${2} --name ${NAME}-solvescript${1} \
+		${REGISTRY}/${NAME}-solvescript 3>&- | tee /dev/fd/3) ; \
+	RETVAL=$$? ; \
+	exec 3>&- ; \
+	echo -e	"\e[1;36m<<<<<<<<<<<<<< END $$(date +'%H:%M:%S')\e[0m"; \
+	printf "$$O" | grep -F -q -- "${FLAG}" > /dev/null 2>&1 && \
+		echo -e "\033[1;32m[+] Real flag found: ${FLAG}\033[0;0m" || ( \
+		([[ "$$RETVAL" -eq "0" ]] && \
+		echo -e "\033[1;31m[!] Flag not found\033[0;0m"; exit 1))
+endef
+
+srun:
+	@echo -e "\e[1;34m[+] Running Solvescript Container against" \
+		"${HOST}:${PORT}\e[0m"
+	@$(call run_check,,-it)
+
+
+skill:
+	@echo -e "\e[1;34m[+] Killing Solution Container/s\e[0m"
+	${RUNTIME} ps --filter "name=${NAME}-solvescript*" --format "{{.ID}}" \
+		| tr '\n' ' ' \
+		| xargs -r ${RUNTIME} stop -t 0 \
+		|| true
+
+########################
+# Challenge Deployment #
+########################
+deploy: deploy-registry
+
+DESCBR=$(subst $(newline),<br />,${DESC})
+export DESCBR
+deploy-yml:
+	@echo -e "\e[1;34m[+] Generating CTFd challenge yml\e[0m"
+	IFS=',' read -ra arr -d '' <<< "$${TAGS}"; \
+	COND_TAG=$$( \
+		if [ -n "$${TAGS}" ]; then \
+		echo -e "tags:"; \
+		for t in "$${arr[@]}"; do echo -e "  - \"$$(echo $$t | xargs)\""; done \
+		fi \
+	) \
+	envsubst < ${MKPATH}/deployment/ctfd-entry.yml.template | \
+		tee ${MKPATH}/deployment/ctfd-${NAME}.yml >/dev/null
+
+# Deployments for podman quadlets (systemd services)
+deploy-quadlet:
+	@echo -e "\e[1;34m[+] (deploy-quadlet) Not implemented in this template\e[0m"
+
+# Deployment for docker-compose
+deploy-docker:
+	@echo -e "\e[1;34m[+] (deploy-docker) Not implemented in this template\e[0m"
+
+# Deployment for registry
+deploy-registry: 
+	@echo -e "\e[1;34m[+] (deploy-registry) Not implemented in this template\e[0m"
+
+#############
+# Testsuite #
+#############
+
+test: test-main test-dist
+
+test-main:
+	@echo -e "\e[1;34m[+] (test-main) Not implemented in this template\e[0m"
+
+test-dist:
+	@echo -e "\e[1;34m[+] (test-dist) Not implemented in this template\e[0m"
+
+###########
+# Generic #
+###########
+
+SHELL := /usr/bin/env bash
+export RUNTIME ?= docker
+# PULL_POLICY_RUN options: always, missing, never
+export PULL_POLICY_RUN = never
+# PULL_POLICY_BUILD options in docker: true, false
+# PULL_POLICY_BUILD options in podman: true, false, always, missing, never
+export PULL_POLICY_BUILD = true 
+
+define lint_assert_file_exists
+	@([ ! -f ${MKPATH}/${1} ] && \
+		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} missing") || \
+		echo "[OK  ] ${1} exists"
+endef
+
+define lint_assert_files_differ
+	@((diff ${MKPATH}/${1} ${MKPATH}/${2} &>/dev/null) && \
+		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} and ${2} are equivalent") || \
+		echo "[OK  ] ${1} and ${2} are different"
+endef
+
+define lint_assert_file_commited
+	git show HEAD:${MKPATH}/${1} &>/dev/null; \
+	([[ "$?" != 0 ]] && \
+		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} not commited in git") || \
+		echo "[OK  ] ${1} commited in git"
+endef
+
+define lint_assert_symlink
+	@(([ ! -L ${MKPATH}/${1} ] || [ ! -e ${MKPATH}/${1} ]) && \
+		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} is not a valid symlink") || \
+		echo "[OK  ] ${1} is a valid symlink"
+endef
+
+define lint_assert_empty
+	@([ ! -s ${MKPATH}/${1} ] && \
+		echo -e "\e[0;41m[FAIL]\e[0;0m ${1} is empty") || \
+		echo "[OK  ] ${1} has content"
+endef
+
+lint:
+	@$(call lint_assert_file_exists,challenge/flag.txt)
+	@$(call lint_assert_file_exists,dist/flag.txt)
+	@$(call lint_assert_file_exists,${NAME}.tar.gz)
+	@$(call lint_assert_files_differ,dist/flag.txt,challenge/flag.txt)
+	@$(call lint_assert_file_commited,${NAME}.tar.gz)
+	@$(call lint_assert_symlink,deployment/.symlink-canary)
+	@$(call lint_assert_empty,solution/WRITEUP.md)
+
+clean:
+	${RM} ${NAME}.tar.gz dist/challenge dist/deploy.sh dist/sha256sum \
+		solution/challenge ctfd-${NAME}.yml
+	make -C challenge clean
+
+version:
+	@echo -e "\e[1;34m[+] Template ${_TEMPLATE} version ${_VERSION}\e[0m"
+
+shell:
+	@echo -e "\e[1;34m[+] (shell) Not implemented in this template\e[0m"
+
+# vim:tabstop=2 softtabstop=2 shiftwidth=2 noexpandtab colorcolumn=81

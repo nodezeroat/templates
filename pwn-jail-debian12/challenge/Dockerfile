@@ -1,0 +1,71 @@
+# Debian Bookworm 12.12 (08.12.2025)
+# GCC 12.2.0 (Debian 12.2.0-14+deb12u1)
+# Clang 14.0.6 (Debian)
+# GLIBC 2.36 (Debian GLIBC 2.36-9+deb12u13)
+
+##################
+# Builder system #
+##################
+FROM docker.io/library/debian:bookworm-20251208-slim AS builder
+
+ADD --chmod=0755 \
+    --checksum=sha256:c125df9762b0c7233459087bb840c0e5dbfc4d9690ee227f1ed8994f4d51d2e0 \
+    https://raw.githubusercontent.com/reproducible-containers/repro-sources-list.sh/v0.1.4/repro-sources-list.sh \
+    /usr/local/bin/repro-sources-list.sh
+
+RUN repro-sources-list.sh
+
+# Install apt dependencies if needed
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y make gcc clang && apt-get clean 
+
+# NOTE: If you want to use a precompiled binary, uncomment
+# comment the build binary section and uncomment the use
+# precompiled binary section
+
+### Build Binary
+COPY . /tmp/build/
+RUN make -C /tmp/build/ challenge
+ARG CACHEBUST=1
+SHELL ["/bin/sh", "-c"]
+CMD cp /tmp/build/challenge /dist/challenge
+
+### Use precompiled binary 
+# COPY ./challenge /tmp/build/challenge
+# COPY ./challenge /dist/challenge
+
+###############
+# Base system #
+###############
+FROM docker.io/library/debian:bookworm-20251208-slim AS base
+
+ADD --chmod=0755 \
+    --checksum=sha256:c125df9762b0c7233459087bb840c0e5dbfc4d9690ee227f1ed8994f4d51d2e0 \
+    https://raw.githubusercontent.com/reproducible-containers/repro-sources-list.sh/v0.1.4/repro-sources-list.sh \
+    /usr/local/bin/repro-sources-list.sh
+
+RUN repro-sources-list.sh
+
+# Install apt dependencies if needed
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y coreutils && apt-get clean
+
+#################
+# Runner system #
+#################
+# Opensuse Tumbleweed (only for running nsjail)
+FROM docker.io/opensuse/tumbleweed@sha256:404df0954fda18f5d823ed520a41ff6e60d7ab00b2ef688477b679c2ff742560 
+
+# Install apk dependencies if needed
+RUN zypper -n install nsjail && zypper -n clean --all
+
+# Copy base filesystem
+COPY --from=base / /jail
+
+# Copy challenge required files
+RUN mkdir -p /jail/app
+COPY --from=builder /tmp/build/challenge /jail/app/challenge
+RUN chmod +x /jail/app/challenge
+COPY setup_entrypoint.sh /setup_entrypoint.sh
+COPY entrypoint.sh /jail/app/entrypoint.sh
+
+SHELL ["/bin/sh", "-c"]
+CMD ["/setup_entrypoint.sh"]

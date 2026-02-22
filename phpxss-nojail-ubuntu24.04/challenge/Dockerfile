@@ -32,7 +32,6 @@ RUN uv pip install selenium urllib3 python-decouple requests bs4 pyvirtualdispla
 COPY config/php.ini $PHP_INI_DIR/php.ini
 COPY web /var/www/html
 COPY bot /bot
-COPY flag.txt /flag.txt
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 RUN touch /tmp/paths && chmod 777 /tmp/paths

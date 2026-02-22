@@ -1,6 +1,0 @@
-PasswordAuthentication no
-Port 22
-PermitRootLogin no
-MaxSessions 5
-
-Subsystem	sftp	/usr/libexec/sftp-server

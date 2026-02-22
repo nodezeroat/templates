@@ -1,29 +1,11 @@
-.PHONY: all run build solve solve-sequential solve-parallel kill dist distrun clean deploy version lint test
+.PHONY: all run build solve kill dist distrun clean version lint test
 
 # Targets
 all: build run
 run: crun
 build: cbuild
 solve: sbuild srun
-solve-sequential: sbuild srun-sequential
-solve-parallel: sbuild srun-parallel
 kill: ckill skill
-
-######################
-# CTFd Configuration #
-######################
-
-export FULLNAME  = CTFd challenge name
-export AUTHOR    = LosFuzzys
-export CATEGORY  = offline
-define DESC
-This is a multiline challenge description!
-
-Feel free to add more lines.
-endef
-export DESC
-export FLAG      = $(shell cat challenge/flag.txt)
-export TAGS      = tag1, tag2, tag with space 
 
 ############################
 # Deployment Configuration #
@@ -44,7 +26,7 @@ export NAME=$(shell echo ${UNCLEAN_NAME} | tr "[:upper:]" "[:lower:]")
 # Major: Big features & breakage of interfaces                  (in sync)
 # Minor: Small functionality changes w/ backward compatibility  (in sync)
 # Patch: Small fixes specific to this template                  (not in sync)
-export _VERSION = 1.0.1
+export _VERSION = 1.0.0
 export _TEMPLATE = offline
 
 ########################
@@ -134,18 +116,6 @@ srun:
 		"${HOST}:${PORT}\e[0m"
 	@$(call run_check,,-it)
 
-TIMES=10
-srun-sequential:
-	@echo -e "\e[1;34m[+] Running Sequential Container against" \
-		"${HOST}:${PORT}\e[0m"
-	@parallel --line-buffer --jobs 1 '$(call run_check,-sequential-{},)' \
-		::: `seq -s' ' 1 1 ${TIMES}`
-	
-JOBS=4
-srun-parallel:
-	@echo -e "\e[1;34m[+] Running Parallel Container against ${HOST}:${PORT}\e[0m"
-	@parallel --jobs ${JOBS} '$(call run_check,-parallel-{},)' \
-		::: `seq -s' ' 1 1 ${TIMES}`
 
 skill:
 	@echo -e "\e[1;34m[+] Killing Solution Container/s\e[0m"
@@ -184,7 +154,6 @@ deploy-docker:
 # Deployment for registry
 deploy-registry: 
 	@echo -e "\e[1;34m[+] (deploy-registry) Not implemented in this template\e[0m"
-
 
 #############
 # Testsuite #
@@ -260,12 +229,5 @@ version:
 
 shell:
 	@echo -e "\e[1;34m[+] (shell) Not implemented in this template\e[0m"
-
-# DO NOT TOUCH
-# Temporary hotfix (hopefully) for DESCBR. Sorry for this!
-define newline
-
-
-endef
 
 # vim:tabstop=2 softtabstop=2 shiftwidth=2 noexpandtab colorcolumn=81
